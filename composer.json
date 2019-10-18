@@ -19,6 +19,6 @@
     }
   },
   "scripts": {
-    "test": "phpunit tests"
+    "test": "vendor/bin/phpunit tests"
   }
 }
