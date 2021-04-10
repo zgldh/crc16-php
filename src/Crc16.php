@@ -124,13 +124,13 @@ class Crc16
         $n = strlen($str) - 1;
         while ($m <= $n) {
             if ($m == $n) {
-                $str{$m} = self::reverseChar($str{$m});
+                $str[$m] = self::reverseChar($str[$m]);
                 break;
             }
-            $ord1 = self::reverseChar($str{$m});
-            $ord2 = self::reverseChar($str{$n});
-            $str{$m} = $ord2;
-            $str{$n} = $ord1;
+            $ord1 = self::reverseChar($str[$m]);
+            $ord2 = self::reverseChar($str[$n]);
+            $str[$m] = $ord2;
+            $str[$n] = $ord1;
             $m++;
             $n--;
         }
@@ -153,9 +153,9 @@ class Crc16
         for ($i = 0; $i < strlen($str); $i++) {
             if ($inputReverse) {
                 // 输入数据每个字节按比特位逆转
-                $c = ord(self::reverseChar($str{$i}));
+                $c = ord(self::reverseChar($str[$i]));
             } else {
-                $c = ord($str{$i});
+                $c = ord($str[$i]);
             }
             $crc ^= ($c << 8);
             for ($j = 0; $j < 8; ++$j) {
