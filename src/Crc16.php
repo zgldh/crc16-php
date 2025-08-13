@@ -7,6 +7,10 @@ namespace Crc16;
 class Crc16
 {
     /**
+     * @var array
+     */
+    private static $crcTable = [];
+    /**
      * CRC-16/IBM
      * @param $str
      * @return mixed
@@ -138,6 +142,30 @@ class Crc16
     }
 
     /**
+     * 生成CRC-16查找表
+     * @param int $polynomial
+     */
+    private static function generateCrcTable($polynomial)
+    {
+        if (isset(self::$crcTable[$polynomial])) {
+            return;
+        }
+        $table = [];
+        for ($i = 0; $i < 256; $i++) {
+            $crc = $i << 8;
+            for ($j = 0; $j < 8; $j++) {
+                if ($crc & 0x8000) {
+                    $crc = (($crc << 1) & 0xffff) ^ $polynomial;
+                } else {
+                    $crc = ($crc << 1) & 0xffff;
+                }
+            }
+            $table[$i] = $crc;
+        }
+        self::$crcTable[$polynomial] = $table;
+    }
+
+    /**
      * @param string $str         待校验字符串
      * @param int $polynomial     二项式
      * @param int $initValue      初始值
@@ -148,8 +176,8 @@ class Crc16
      */
     public static function hash($str, $polynomial, $initValue, $xOrValue, $inputReverse = false, $outputReverse = false)
     {
+        self::generateCrcTable($polynomial);
         $crc = $initValue;
-
         for ($i = 0; $i < strlen($str); $i++) {
             if ($inputReverse) {
                 // 输入数据每个字节按比特位逆转
@@ -157,14 +185,7 @@ class Crc16
             } else {
                 $c = ord($str[$i]);
             }
-            $crc ^= ($c << 8);
-            for ($j = 0; $j < 8; ++$j) {
-                if ($crc & 0x8000) {
-                    $crc = (($crc << 1) & 0xffff) ^ $polynomial;
-                } else {
-                    $crc = ($crc << 1) & 0xffff;
-                }
-            }
+            $crc = (($crc << 8) ^ (self::$crcTable[$polynomial][($crc >> 8) ^ $c])) & 0xffff;
         }
         if ($outputReverse) {
             // 把低地址存低位，即采用小端法将整数转换为字符串
@@ -178,3 +199,4 @@ class Crc16
         return $crc ^ $xOrValue;
     }
 }
+
